@@ -1,0 +1,30 @@
+---
+- name: Configuration du conteneur StackNova recette
+  hosts: stacknova
+  gather_facts: false
+
+  vars:
+    project_name: "StackNova"
+    environment_name: "recette"
+    deploy_timestamp: "{{ lookup('pipe', 'date +%Y-%m-%d_%H:%M:%S') }}"
+
+  tasks:
+    - name: Créer une page index personnalisée
+      raw: |
+        cat > /usr/share/nginx/html/index.html <<EOF
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+          <meta charset="UTF-8">
+          <title>StackNova - recette</title>
+        </head>
+        <body>
+          <h1>StackNova</h1>
+          <p>Environnement : recette</p>
+          <p>Date de déploiement : {{ deploy_timestamp }}</p>
+        </body>
+        </html>
+        EOF
+
+    - name: Vérifier que nginx est actif dans le conteneur
+      raw: curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1/ || exit 1
